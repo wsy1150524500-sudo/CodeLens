@@ -237,7 +237,7 @@ function onInputAreaDrop(e) {
           <input
             ref="fileInput"
             type="file"
-            accept=".md,.txt,.pdf,.docx"
+            accept=".md,.txt,.pdf,.docx,.py,.js,.ts,.jsx,.tsx,.java,.go,.rs,.c,.cpp,.h,.cs,.rb,.php,.sql,.sh,.yaml,.yml,.json,.xml,.html,.css,.vue"
             multiple
             class="hidden"
             @change="onFileInputChange"
@@ -258,7 +258,7 @@ function onInputAreaDrop(e) {
                         bg-gray-800 text-xs text-gray-300 rounded-lg whitespace-nowrap
                         opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none
                         border border-gray-700 shadow-lg">
-              支持 .md / .txt / .pdf / .docx
+              支持文档（.md .txt .pdf .docx）和代码文件（.py .js .java .go 等）
             </div>
           </button>
 

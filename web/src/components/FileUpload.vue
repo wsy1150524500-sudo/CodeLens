@@ -42,7 +42,7 @@ function onDrop(e) {
     <label class="cursor-pointer">
       <input
         type="file"
-        accept=".md,.txt,.pdf,.docx"
+        accept=".md,.txt,.pdf,.docx,.py,.js,.ts,.jsx,.tsx,.java,.go,.rs,.c,.cpp,.h,.cs,.rb,.php,.sql,.sh,.yaml,.yml,.json,.xml,.html,.css,.vue"
         multiple
         class="hidden"
         @change="handleFiles"

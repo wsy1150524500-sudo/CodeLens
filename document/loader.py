@@ -1,4 +1,4 @@
-"""文档加载与语义感知分块。支持 .md / .txt / .pdf / .docx"""
+"""文档加载与语义感知分块。支持文档、代码等多种格式。"""
 
 from __future__ import annotations
 
@@ -10,8 +10,23 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 SUPPORTED_EXTENSIONS = {".md", ".txt", ".pdf", ".docx"}
 
+# 代码文件扩展名（本质是纯文本，直接读取）
+_CODE_EXTENSIONS = {
+    ".py", ".js", ".ts", ".jsx", ".tsx",
+    ".java", ".go", ".rs", ".c", ".cpp", ".h", ".hpp",
+    ".cs", ".rb", ".php", ".swift", ".kt",
+    ".sql", ".sh", ".bash", ".yaml", ".yml",
+    ".json", ".xml", ".html", ".css", ".scss",
+    ".vue", ".svelte",
+}
+
+SUPPORTED_EXTENSIONS = {".md", ".txt", ".pdf", ".docx"} | _CODE_EXTENSIONS
+
 # 中英文句子边界分隔符，优先在句号/换行处断开
 _SEPARATORS = ["\n\n", "\n", "。", "！", "？", ".", "!", "?", "；", ";", " ", ""]
+
+# 代码文件分隔符，优先在函数/类定义边界断开
+_CODE_SEPARATORS = ["\nclass ", "\ndef ", "\nasync def ", "\nfunction ", "\nexport ", "\n\n", "\n", " ", ""]
 
 
 def load_file(file_path: str) -> str:
@@ -22,7 +37,7 @@ def load_file(file_path: str) -> str:
             f"不支持的文件类型: {ext}，支持 {', '.join(SUPPORTED_EXTENSIONS)}"
         )
 
-    if ext in (".md", ".txt"):
+    if ext in (".md", ".txt") or ext in _CODE_EXTENSIONS:
         return _load_text(file_path)
     elif ext == ".pdf":
         return _load_pdf(file_path)
@@ -62,8 +77,10 @@ def split_documents(
     chunk_overlap: int = 100,
 ) -> List[Document]:
     """将文本按语义感知策略切分为 LangChain Document 列表。"""
+    ext = os.path.splitext(filename)[1].lower()
+    is_code = ext in _CODE_EXTENSIONS
     splitter = RecursiveCharacterTextSplitter(
-        separators=_SEPARATORS,
+        separators=_CODE_SEPARATORS if is_code else _SEPARATORS,
         chunk_size=chunk_size,
         chunk_overlap=chunk_overlap,
         length_function=len,

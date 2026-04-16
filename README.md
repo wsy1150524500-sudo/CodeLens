@@ -34,6 +34,8 @@ CodeLens/
 ├── expert_profile.yaml        # 专家人设配置
 ├── requirements.txt           # Python 依赖
 ├── test_agent.py              # 端到端测试脚本
+├── Dockerfile                 # Docker 镜像构建（前后端合一）
+├── .dockerignore              # Docker 构建排除文件
 ├── agent/                     # Agent 核心
 │   ├── agent.py               # Agent 逻辑 + 对话记忆管理
 │   └── tools.py               # Tool 定义（文档问答、文档总结）
@@ -64,6 +66,7 @@ CodeLens/
 
 - Python 3.10+
 - Node.js 18+
+- Docker（可选，用于容器化部署）
 
 ### 1. 克隆项目
 
@@ -113,6 +116,18 @@ npm run dev
 ```powershell
 .venv/Scripts/python test_agent.py
 ```
+
+### Docker 部署（可选）
+
+```bash
+# 构建镜像
+docker build -t codelens .
+
+# 运行
+docker run -p 8000:8000 -e DASHSCOPE_API_KEY=你的key codelens
+```
+
+浏览器打开 http://localhost:8000 ，前后端合并在同一个服务中。
 
 ## API 接口
 

@@ -1,0 +1,11 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+vectorstore/faiss_index/
+uploads/
+chat_history/
+.idea/
+.vscode/
+web/node_modules/
+web/dist/

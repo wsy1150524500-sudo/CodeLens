@@ -28,3 +28,7 @@ knowledge_files:
   - design_patterns.md
   - refactoring.md
   - code_review.md
+  - testing.md
+  - error_handling.md
+  - architecture.md
+  - git_workflow.md

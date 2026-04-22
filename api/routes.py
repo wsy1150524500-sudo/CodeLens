@@ -9,11 +9,11 @@ from api.schemas import (
     ChatRequest, ChatResponse, UploadResponse, SummaryRequest, SummaryResponse,
 )
 from document.loader import load_file, split_documents, SUPPORTED_EXTENSIONS
-from vectorstore.store import add_documents, async_add_documents, has_index
-from vectorstore.registry import compute_hash, is_duplicate, register_file, list_documents
+from vectorstore.store import add_documents, async_add_documents, has_index, remove_documents_by_source
+from vectorstore.registry import compute_hash, is_duplicate, register_file, list_documents, unregister_file
 from chains.rag_chain import build_rag_chain, stream_rag_chain
 from chains.summary_chain import summarize_text, stream_summarize
-from agent.agent import run_agent, stream_agent, get_session_history, list_sessions
+from agent.agent import run_agent, stream_agent, get_session_history, list_sessions, delete_session
 
 router = APIRouter()
 
@@ -82,6 +82,16 @@ async def get_documents():
     return {"count": len(docs), "documents": docs}
 
 
+@router.delete("/documents/{filename:path}")
+async def delete_document(filename: str):
+    """删除指定文档（从向量库和注册表中移除）。"""
+    removed = remove_documents_by_source(filename)
+    if removed == 0 and not unregister_file(filename):
+        raise HTTPException(404, f"文档 {filename} 不存在")
+    unregister_file(filename)
+    return {"message": f"已删除 {removed} 个片段", "filename": filename}
+
+
 @router.get("/sessions")
 async def get_sessions():
     """获取所有会话列表。"""
@@ -94,6 +104,15 @@ async def get_session_messages(session_id: str):
     """获取指定会话的历史消息。"""
     messages = get_session_history(session_id)
     return {"session_id": session_id, "messages": messages}
+
+
+@router.delete("/sessions/{session_id}")
+async def remove_session(session_id: str):
+    """删除指定会话。"""
+    deleted = delete_session(session_id)
+    if not deleted:
+        raise HTTPException(404, f"会话 {session_id} 不存在")
+    return {"message": "会话已删除", "session_id": session_id}
 
 
 @router.post("/chat", response_model=ChatResponse)

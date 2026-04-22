@@ -55,3 +55,13 @@ def list_documents() -> List[Dict[str, str]]:
 def get_document_count() -> int:
     """获取已入库文档数量。"""
     return len(_load_registry())
+
+
+def unregister_file(filename: str) -> bool:
+    """从注册表中移除文件记录。"""
+    registry = _load_registry()
+    if filename in registry:
+        del registry[filename]
+        _save_registry(registry)
+        return True
+    return False

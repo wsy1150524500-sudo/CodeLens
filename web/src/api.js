@@ -21,6 +21,12 @@ export async function getDocuments() {
   return res.json()
 }
 
+export async function deleteDocument(filename) {
+  const res = await fetch(`${BASE}/documents/${encodeURIComponent(filename)}`, { method: 'DELETE' })
+  if (!res.ok) throw new Error('删除失败')
+  return res.json()
+}
+
 export async function getSessions() {
   const res = await fetch(`${BASE}/sessions`)
   return res.json()
@@ -28,6 +34,12 @@ export async function getSessions() {
 
 export async function getSessionMessages(sessionId) {
   const res = await fetch(`${BASE}/sessions/${sessionId}/messages`)
+  return res.json()
+}
+
+export async function deleteSession(sessionId) {
+  const res = await fetch(`${BASE}/sessions/${sessionId}`, { method: 'DELETE' })
+  if (!res.ok) throw new Error('删除失败')
   return res.json()
 }
 

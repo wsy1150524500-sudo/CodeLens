@@ -1,34 +1,53 @@
 @import "tailwindcss";
 @import "highlight.js/styles/github-dark.css";
 
+/* 字体：开发者工具风格 */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+body {
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+code, pre, textarea {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
 /* 滚动条美化 */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+/* 平滑滚动 */
+.scroll-smooth { scroll-behavior: smooth; }
 
 /* Markdown 渲染样式 */
-.markdown-body h1 { font-size: 1.5em; font-weight: 700; margin: 0.8em 0 0.4em; }
-.markdown-body h2 { font-size: 1.25em; font-weight: 700; margin: 0.8em 0 0.4em; }
-.markdown-body h3 { font-size: 1.1em; font-weight: 600; margin: 0.6em 0 0.3em; }
-.markdown-body p { margin: 0.4em 0; line-height: 1.7; }
+.markdown-body h1 { font-size: 1.5em; font-weight: 700; margin: 0.8em 0 0.4em; color: #f1f5f9; }
+.markdown-body h2 { font-size: 1.25em; font-weight: 700; margin: 0.8em 0 0.4em; color: #f1f5f9; }
+.markdown-body h3 { font-size: 1.1em; font-weight: 600; margin: 0.6em 0 0.3em; color: #e2e8f0; }
+.markdown-body p { margin: 0.4em 0; line-height: 1.75; color: #cbd5e1; }
 .markdown-body ul, .markdown-body ol { padding-left: 1.5em; margin: 0.4em 0; }
-.markdown-body li { margin: 0.2em 0; }
+.markdown-body li { margin: 0.25em 0; color: #cbd5e1; }
 .markdown-body code {
   background: #1e293b;
   padding: 0.15em 0.4em;
   border-radius: 4px;
-  font-size: 0.9em;
+  font-size: 0.85em;
+  color: #7dd3fc;
 }
 .markdown-body pre {
   background: #0f172a;
+  border: 1px solid #1e293b;
   border-radius: 8px;
   padding: 1em;
   overflow-x: auto;
-  margin: 0.6em 0;
+  margin: 0.8em 0;
 }
 .markdown-body pre code {
   background: transparent;
   padding: 0;
+  color: inherit;
 }
 .markdown-body blockquote {
   border-left: 3px solid #3b82f6;
@@ -37,4 +56,42 @@
   margin: 0.6em 0;
 }
 .markdown-body strong { color: #e2e8f0; }
-.markdown-body hr { border-color: #334155; margin: 1em 0; }
+.markdown-body hr { border-color: #1e293b; margin: 1.2em 0; }
+.markdown-body a { color: #60a5fa; text-decoration: none; }
+.markdown-body a:hover { text-decoration: underline; }
+.markdown-body table { border-collapse: collapse; width: 100%; margin: 0.8em 0; }
+.markdown-body th, .markdown-body td {
+  border: 1px solid #1e293b;
+  padding: 0.5em 0.75em;
+  text-align: left;
+  font-size: 0.9em;
+}
+.markdown-body th { background: #1e293b; color: #e2e8f0; font-weight: 600; }
+.markdown-body td { color: #cbd5e1; }
+
+/* 减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 会话列表入场/退场动画 */
+.session-item-enter-active {
+  transition: all 0.3s ease-out;
+}
+.session-item-leave-active {
+  transition: all 0.2s ease-in;
+}
+.session-item-enter-from {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+.session-item-leave-to {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+.session-item-move {
+  transition: transform 0.3s ease;
+}

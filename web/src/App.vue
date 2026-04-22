@@ -2,7 +2,7 @@
 import { ref, reactive, nextTick, watch, onMounted } from 'vue'
 import Sidebar from './components/Sidebar.vue'
 import ChatMessage from './components/ChatMessage.vue'
-import { streamChat, uploadFile, getSessions, getSessionMessages } from './api.js'
+import { streamChat, uploadFile, getSessions, getSessionMessages, deleteSession } from './api.js'
 
 // 会话管理
 const sessions = ref([])
@@ -16,12 +16,8 @@ onMounted(async () => {
     if (data.sessions?.length) {
       sessions.value = data.sessions.map((s) => ({ ...s, messages: [] }))
       await selectSession(sessions.value[0].id)
-    } else {
-      newSession()
     }
-  } catch {
-    newSession()
-  }
+  } catch {}
 })
 
 function newSession() {
@@ -37,7 +33,6 @@ async function selectSession(id) {
   let s = sessions.value.find((s) => s.id === id)
   if (!s) return
 
-  // 如果消息为空，从后端加载
   if (!s.messages.length) {
     try {
       const data = await getSessionMessages(id)
@@ -48,15 +43,36 @@ async function selectSession(id) {
   scrollToBottom()
 }
 
+async function removeSession(id) {
+  try {
+    await deleteSession(id)
+  } catch {}
+  sessions.value = sessions.value.filter((s) => s.id !== id)
+  if (currentSessionId.value === id) {
+    if (sessions.value.length) {
+      await selectSession(sessions.value[0].id)
+    } else {
+      // 全部删完，清空状态，显示空界面
+      currentSessionId.value = ''
+      currentSession.value = { id: '', title: '', messages: [] }
+    }
+  }
+}
+
 // 对话
 const inputText = ref('')
 const isStreaming = ref(false)
 const chatContainer = ref(null)
+const sidebarCollapsed = ref(false)
 
-function scrollToBottom() {
+function scrollToBottom(force = false) {
   nextTick(() => {
-    if (chatContainer.value) {
-      chatContainer.value.scrollTop = chatContainer.value.scrollHeight
+    const el = chatContainer.value
+    if (!el) return
+    // 只在用户已经在底部附近（100px 内）或强制时才自动滚动
+    const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 100
+    if (force || isNearBottom) {
+      el.scrollTop = el.scrollHeight
     }
   })
 }
@@ -65,16 +81,22 @@ async function sendMessage() {
   const query = inputText.value.trim()
   if (!query || isStreaming.value) return
 
+  // 无会话时自动创建
+  if (!sessions.value.length || !currentSession.value.id) {
+    newSession()
+  }
+
   const msgs = currentSession.value.messages
   msgs.push({ role: 'user', content: query })
   inputText.value = ''
-  scrollToBottom()
+  scrollToBottom(true)
 
   const aiMsg = reactive({ role: 'assistant', content: '', loading: true })
   msgs.push(aiMsg)
   isStreaming.value = true
-  scrollToBottom()
+  scrollToBottom(true)
 
+  // 自动命名：用第一条消息的前 20 字作为标题
   if (msgs.length <= 2) {
     currentSession.value.title = query.slice(0, 20) + (query.length > 20 ? '...' : '')
   }
@@ -170,9 +192,25 @@ function onInputAreaDrop(e) {
     <Sidebar
       :sessions="sessions"
       :currentSession="currentSessionId"
+      :collapsed="sidebarCollapsed"
       @selectSession="selectSession"
       @newSession="newSession"
+      @toggleCollapse="sidebarCollapsed = !sidebarCollapsed"
+      @deleteSession="removeSession"
     />
+
+    <!-- 收起时的展开按钮 -->
+    <button
+      v-if="sidebarCollapsed"
+      class="absolute top-4 left-4 z-20 w-8 h-8 flex items-center justify-center
+             rounded-lg bg-gray-800 border border-gray-700 text-gray-400
+             hover:text-white hover:bg-gray-700 transition-colors cursor-pointer"
+      @click="sidebarCollapsed = false"
+    >
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+      </svg>
+    </button>
 
     <!-- 主区域 -->
     <div class="flex-1 flex flex-col">
@@ -183,9 +221,15 @@ function onInputAreaDrop(e) {
           v-if="!currentSession.messages.length"
           class="h-full flex flex-col items-center justify-center text-gray-500"
         >
-          <div class="text-5xl mb-4">🔍</div>
-          <div class="text-lg font-medium mb-2">代码分析助手</div>
-          <div class="text-sm max-w-md text-center">
+          <div class="w-16 h-16 mb-4 rounded-2xl bg-emerald-600/10 border border-emerald-600/20
+                      flex items-center justify-center">
+            <svg class="w-8 h-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+            </svg>
+          </div>
+          <div class="text-lg font-medium mb-2 text-gray-300">CodeLens</div>
+          <div class="text-sm max-w-md text-center leading-relaxed">
             粘贴代码让我帮你审查，或上传文档构建知识库。<br />
             支持代码审查、安全分析、性能诊断、重构建议。
           </div>
@@ -219,7 +263,7 @@ function onInputAreaDrop(e) {
                  pointer-events-none"
         >
           <span class="text-blue-400 text-sm font-medium">
-            📎 松开鼠标上传文件
+            松开鼠标上传文件
           </span>
         </div>
 
@@ -286,7 +330,10 @@ function onInputAreaDrop(e) {
             <svg v-if="!isStreaming" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
             </svg>
-            <span v-else class="text-xs">⏳</span>
+            <svg v-else class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
           </button>
         </div>
       </div>

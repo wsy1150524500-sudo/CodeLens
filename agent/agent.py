@@ -136,3 +136,12 @@ def list_sessions() -> list:
                 break
         sessions.append({"id": session_id, "title": title})
     return sessions
+
+
+def delete_session(session_id: str) -> bool:
+    """删除指定会话的历史记录文件。"""
+    file_path = os.path.join(config.CHAT_HISTORY_DIR, f"{session_id}.json")
+    if os.path.exists(file_path):
+        os.remove(file_path)
+        return True
+    return False

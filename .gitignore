@@ -9,3 +9,4 @@ chat_history/
 .vscode/
 web/node_modules/
 web/dist/
+.kiro/

@@ -20,7 +20,7 @@
 
 - 前端：Vue 3 + Vite + Tailwind CSS
 - 后端：Python + FastAPI + LangChain
-- LLM：阿里云百炼 qwen3.5-plus（OpenAI 兼容接口）
+- LLM：阿里云百炼 qwen3.7-plus（OpenAI 兼容接口）
 - Embedding：百炼 qwen3-vl-embedding（dashscope SDK）
 - 向量数据库：FAISS（本地持久化）
 - Agent 框架：LangGraph ReAct Agent
@@ -148,7 +148,7 @@ docker run -p 8000:8000 -e DASHSCOPE_API_KEY=你的key codelens
 ### 环境变量（.env）
 
 - `DASHSCOPE_API_KEY` - 阿里云百炼 API Key（必填）
-- `LLM_MODEL` - LLM 模型名称，默认 qwen3.5-plus
+- `LLM_MODEL` - LLM 模型名称，默认 qwen3.7-plus
 - `EMBEDDING_MODEL` - Embedding 模型名称，默认 qwen3-vl-embedding
 - `LLM_BASE_URL` - LLM API 地址，默认百炼兼容接口
 - `EMBEDDING_CONCURRENCY` - Embedding 并发数，默认 5

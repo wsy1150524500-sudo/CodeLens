@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DASHSCOPE_API_KEY: str = os.getenv("DASHSCOPE_API_KEY", "")
-LLM_MODEL: str = os.getenv("LLM_MODEL", "qwen3.5-plus")
+LLM_MODEL: str = os.getenv("LLM_MODEL", "qwen3.7-plus")
 EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "qwen3-vl-embedding")
 LLM_BASE_URL: str = os.getenv("LLM_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
 
